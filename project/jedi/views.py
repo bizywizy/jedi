@@ -1,6 +1,6 @@
 from django.urls import reverse
 from django.views.generic.edit import CreateView, FormView
-from .forms import CandidateForm
+from .forms import CandidateForm, ChallengeForm
 
 
 class NewCandidateView(CreateView):
@@ -13,4 +13,5 @@ class NewCandidateView(CreateView):
 
 
 class ChallengeView(FormView):
-    pass
+    form_class = ChallengeForm
+    template_name = 'jedi/try_challenge.html'

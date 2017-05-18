@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class Planet(models.Model):
@@ -8,9 +9,16 @@ class Planet(models.Model):
         return self.name
 
 
+class JediCanTeachManager(models.Manager):
+    def get_queryset(self):
+        return super(JediCanTeachManager, self).get_queryset().annotate(
+            models.Count('candidate')).filter(candidate__count__lte=3)
+
+
 class Jedi(models.Model):
     name = models.CharField(max_length=100)
     planet = models.ForeignKey(Planet)
+    can_teach = JediCanTeachManager()
 
     def __str__(self):
         return self.name
@@ -43,7 +51,7 @@ class Answer(models.Model):
 
 class Challenge(models.Model):
     # решил, что на каждой планете по одному ордену, дабы не вводить еще одну сущность
-    order = models.ForeignKey(Planet)
+    order = models.OneToOneField(Planet)
     question = models.ManyToManyField(Question)
 
     def __str__(self):
