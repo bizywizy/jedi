@@ -1,5 +1,5 @@
 {% extends 'jedi/base.html' %}
 {% block title %} {{ block.super }} Главная {% endblock %}
 {% block content %}
-hello
+<a href="{% url 'new-candidate' %}">Candidate</a>
 {% endblock %}
