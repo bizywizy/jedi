@@ -2,6 +2,6 @@
 {% block title %} {{ block.super }} Candidates for you {% endblock %}
 {% block content %}
 {% for candidate in candidates %}
-<p><a href="{% url 'candidate' candidate_id=candidate.id %}">{{ candidate.name }}</a></p>
+<p><a href="{% url 'candidate' candidate_id=candidate.id jedi_id=jedi_id %}">{{ candidate.name }}</a></p>
 {% endfor %}
 {% endblock %}

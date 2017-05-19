@@ -28,3 +28,12 @@ class ChallengeForm(forms.Form):
 class JediSelectForm(forms.Form):
     jedi = forms.ModelChoiceField(queryset=Jedi.can_teach.all())
 
+
+class AddPadawan(forms.Form):
+    take = forms.BooleanField(label='Take this candidate?', required=False)
+
+    def save(self):
+        if self.cleaned_data['take']:
+            candidate = Candidate.objects.get(id=self.initial['candidate_id'])
+            candidate.jedi_id = self.initial['jedi_id']
+            candidate.save()

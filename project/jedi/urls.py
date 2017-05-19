@@ -12,5 +12,6 @@ urlpatterns = [
         TemplateView.as_view(template_name='jedi/passed_candidate.html'), name='passed'),
     url('jedi$', views.JediSelectView.as_view(), name='select-jedi'),
     url('jedi/(?P<jedi_id>[0-9]+)/candidate/list$', views.JediView.as_view(), name='jedi'),
-    url('jedi/[0-9]+/candidate/(?P<candidate_id>[0-9]+)$', views.CandidateToPadawanView.as_view(), name='candidate')
+    url('jedi/(?P<jedi_id>[0-9]+)/candidate/(?P<candidate_id>[0-9]+)$',
+        views.CandidateToPadawanView.as_view(), name='candidate')
 ]

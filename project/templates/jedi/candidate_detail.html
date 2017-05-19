@@ -6,4 +6,9 @@
 {% for answer in candidate.answer_set.all %}
 <p>{{ answer.question.text }}<br>{{ answer.answer|yesno:"Yes,No" }}</p>
 {% endfor%}
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit">
+</form>
 {% endblock %}

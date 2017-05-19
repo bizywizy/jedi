@@ -1,8 +1,9 @@
 from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, FormView
+from django.views.generic.edit import FormMixin
 
-from .forms import CandidateForm, ChallengeForm, JediSelectForm
+from .forms import CandidateForm, ChallengeForm, JediSelectForm, AddPadawan
 from .models import Challenge, Candidate, Jedi
 
 
@@ -52,8 +53,32 @@ class JediView(ListView):
         jedi = Jedi.can_teach.get(id=self.kwargs['jedi_id'])
         return Candidate.objects.filter(planet=jedi.planet)
 
+    def get_context_data(self, **kwargs):
+        context = super(JediView, self).get_context_data(**kwargs)
+        context['jedi_id'] = self.kwargs['jedi_id']
+        return context
 
-class CandidateToPadawanView(DetailView):
+
+class CandidateToPadawanView(DetailView, FormMixin):
     model = Candidate
     template_name = 'jedi/candidate_detail.html'
     pk_url_kwarg = 'candidate_id'
+    form_class = AddPadawan
+    success_url = '/'
+
+    def get_initial(self):
+        return {'candidate_id': self.kwargs['candidate_id'],
+                'jedi_id': self.kwargs['jedi_id']}
+
+    def form_valid(self, form):
+        form.save()
+        return super(CandidateToPadawanView, self).form_valid(form)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
