@@ -1,0 +1,9 @@
+{% extends 'jedi/base.html' %}
+{% block title %} {{ block.super }} Главная {% endblock %}
+{% block content %}
+<h1>{{ candidate.name }}</h1>
+<h2>{{ candidate.age }}</h2>
+{% for answer in candidate.answer_set.all %}
+<p>{{ answer.question.text }}<br>{{ answer.answer|yesno:"Yes,No" }}</p>
+{% endfor%}
+{% endblock %}

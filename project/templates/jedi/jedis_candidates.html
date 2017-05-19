@@ -1,0 +1,7 @@
+{% extends 'jedi/base.html' %}
+{% block title %} {{ block.super }} Candidates for you {% endblock %}
+{% block content %}
+{% for candidate in candidates %}
+<p><a href="{% url 'candidate' candidate_id=candidate.id %}">{{ candidate.name }}</a></p>
+{% endfor %}
+{% endblock %}
