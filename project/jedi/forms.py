@@ -1,6 +1,7 @@
 from django import forms
-from django.http import Http404
+from django.core.exceptions import PermissionDenied
 from .models import Candidate, Answer, Jedi
+from django.db import IntegrityError
 
 
 class CandidateForm(forms.ModelForm):
@@ -10,19 +11,22 @@ class CandidateForm(forms.ModelForm):
 
 
 class ChallengeForm(forms.Form):
+    # переопределим конструктор формы для динамического создания полей
     def __init__(self, *args, **kwargs):
-        candidate_id = kwargs.pop('candidate_id', None)
+        candidate = kwargs.pop('candidate', None)
         questions = kwargs.pop('questions', None)
-        if None in (candidate_id, questions):
-            raise Http404
         super(ChallengeForm, self).__init__(*args, **kwargs)
-        self.candidate_id = candidate_id
+        self.candidate = candidate
+        # создание полей, где id вопроса является названием поля, а text вопроса - лейблом поля
         for q in questions:
             self.fields[str(q[0])] = forms.BooleanField(label=q[1], required=False)
 
     def save(self):
-        for k, v in self.cleaned_data.items():
-            Answer.objects.create(question_id=k, candidate_id=self.candidate_id, answer=v)
+        try:
+            for k, v in self.cleaned_data.items():
+                Answer.objects.create(question_id=k, candidate=self.candidate, answer=v)
+        except IntegrityError:
+            raise PermissionDenied
 
 
 class JediSelectForm(forms.Form):
@@ -34,6 +38,7 @@ class AddPadawan(forms.Form):
 
     def save(self):
         if self.cleaned_data['take']:
-            candidate = Candidate.objects.get(id=self.initial['candidate_id'])
-            candidate.jedi_id = self.initial['jedi_id']
+            jedi = self.initial['jedi']
+            candidate = self.initial['candidate']
+            candidate.jedi = jedi
             candidate.save()

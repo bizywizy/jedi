@@ -2,6 +2,7 @@ from django.shortcuts import redirect, reverse
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, FormView
 from django.views.generic.edit import FormMixin
+from django.shortcuts import get_object_or_404
 
 from .forms import CandidateForm, ChallengeForm, JediSelectForm, AddPadawan
 from .models import Challenge, Candidate, Jedi
@@ -21,16 +22,18 @@ class ChallengeView(FormView):
     template_name = 'jedi/try_challenge.html'
     success_url = reverse_lazy('passed')
 
-    def dispatch(self, request, *args, **kwargs):
-        order_id = kwargs['order_id']
-        self.questions = Challenge.objects.get(order_id=order_id).question.all()
-        return super(ChallengeView, self).dispatch(request, *args, **kwargs)
-
+    # передаем в класс формы именованные аргументы
+    # для динамического создания полей и сохранения формы
     def get_form_kwargs(self):
-        kwargs = super(ChallengeView, self).get_form_kwargs()
-        kwargs['candidate_id'] = self.kwargs['candidate_id']
-        kwargs['questions'] = [(q.id, q.text) for q in self.questions]
-        return kwargs
+        candidate_id = self.kwargs.get('candidate_id', None)
+        candidate = get_object_or_404(Candidate, id=candidate_id)
+        order_id = self.kwargs.get('order_id', None)
+        # получаем список вопросов из определенного испытания
+        questions = get_object_or_404(Challenge, order_id=order_id).question.all()
+        form_kwargs = super(ChallengeView, self).get_form_kwargs()
+        form_kwargs['candidate'] = candidate
+        form_kwargs['questions'] = [(q.id, q.text) for q in questions]
+        return form_kwargs
 
     def form_valid(self, form):
         form.save()
@@ -49,16 +52,20 @@ class JediView(ListView):
     template_name = 'jedi/jedis_candidates.html'
     context_object_name = 'candidates'
 
+    # возвращаем список кандидатов с планеты джедая
     def get_queryset(self):
-        jedi = Jedi.objects.get(id=self.kwargs['jedi_id'])
+        jedi_id = self.kwargs.get('jedi_id', None)
+        jedi = get_object_or_404(Jedi, id=jedi_id)
         return Candidate.objects.filter(planet=jedi.planet)
 
+    # добавляем в контекст id джедая для формирования урла
     def get_context_data(self, **kwargs):
         context = super(JediView, self).get_context_data(**kwargs)
         context['jedi_id'] = self.kwargs['jedi_id']
         return context
 
 
+# использую FormMixin для отображения формы внутри DetailView
 class CandidateToPadawanView(DetailView, FormMixin):
     model = Candidate
     template_name = 'jedi/candidate_detail.html'
@@ -66,16 +73,21 @@ class CandidateToPadawanView(DetailView, FormMixin):
     form_class = AddPadawan
     success_url = '/'
 
+    # передаем в форму кандидата и джедая для последующей связи
     def get_initial(self):
-        return {'candidate_id': self.kwargs['candidate_id'],
-                'jedi_id': self.kwargs['jedi_id']}
+        candidate_id = self.kwargs.get('candidate_id', None)
+        candidate = get_object_or_404(Candidate, id=candidate_id)
+        jedi_id = self.kwargs.get('jedi_id', None)
+        jedi = get_object_or_404(Jedi, id=jedi_id)
+        return {'candidate': candidate,
+                'jedi': jedi}
 
     def form_valid(self, form):
         form.save()
         return super(CandidateToPadawanView, self).form_valid(form)
 
+    # DetailView по-дефолту не принимает POST запрос, сделаем так, чтобы принимал
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         if form.is_valid():

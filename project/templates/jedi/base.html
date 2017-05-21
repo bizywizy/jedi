@@ -2,9 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Академия Джедаев - {% endblock %}</title>
+    <title>{% block title %}Jedi Academy - {% endblock %}</title>
 </head>
 <body>
+<ul>
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'jedi-list' %}">Jedi list</a> </li>
+    <li><a href="{% url 'jedi-list-gt1' %}">Jedi list(more than 1 padawan)</a> </li>
+</ul>
 {% block content %}{% endblock %}
 </body>
 </html>
