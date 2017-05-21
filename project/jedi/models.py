@@ -9,16 +9,22 @@ class Planet(models.Model):
         return self.name
 
 
-class JediCanTeachManager(models.Manager):
+class JediManager(models.Manager):
     def get_queryset(self):
-        return super(JediCanTeachManager, self).get_queryset().annotate(
-            models.Count('candidate')).filter(candidate__count__lte=3)
+        return super(JediManager, self).get_queryset().annotate(padawans_cnt=models.Count('candidate'))
+
+    def can_teach(self):
+        return self.get_queryset().filter(padawans_cnt__lte=3)
+
+    def more_than_one(self):
+        return self.get_queryset().filter(padawans_cnt__gt=1)
 
 
 class Jedi(models.Model):
     name = models.CharField(max_length=100)
     planet = models.ForeignKey(Planet)
-    can_teach = JediCanTeachManager()
+    objects = models.Manager()
+    with_padawans = JediManager()
 
     def __str__(self):
         return self.name
@@ -47,6 +53,9 @@ class Answer(models.Model):
     candidate = models.ForeignKey(Candidate)
     question = models.ForeignKey(Question)
     answer = models.BooleanField()
+
+    class Meta:
+        unique_together = (('candidate', 'question'),)
 
 
 class Challenge(models.Model):

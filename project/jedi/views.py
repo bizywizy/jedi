@@ -50,7 +50,7 @@ class JediView(ListView):
     context_object_name = 'candidates'
 
     def get_queryset(self):
-        jedi = Jedi.can_teach.get(id=self.kwargs['jedi_id'])
+        jedi = Jedi.with_padawans.can_teach().get(id=self.kwargs['jedi_id'])
         return Candidate.objects.filter(planet=jedi.planet)
 
     def get_context_data(self, **kwargs):
@@ -82,3 +82,13 @@ class CandidateToPadawanView(DetailView, FormMixin):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+
+
+class JediListView(ListView):
+    queryset = Jedi.with_padawans.all()
+    template_name = 'jedi/list_jedi.html'
+    context_object_name = 'jedis'
+
+
+class JediListMoreThanOneView(JediListView):
+    queryset = Jedi.with_padawans.more_than_one()

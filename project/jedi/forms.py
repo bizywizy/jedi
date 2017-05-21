@@ -26,7 +26,7 @@ class ChallengeForm(forms.Form):
 
 
 class JediSelectForm(forms.Form):
-    jedi = forms.ModelChoiceField(queryset=Jedi.can_teach.all())
+    jedi = forms.ModelChoiceField(queryset=Jedi.with_padawans.can_teach())
 
 
 class AddPadawan(forms.Form):
