@@ -1,5 +1,4 @@
 from django.db import models
-from django.urls import reverse
 
 
 class Planet(models.Model):
@@ -30,12 +29,18 @@ class Jedi(models.Model):
         return self.name
 
 
+class CandidateManager(models.Manager):
+    def get_queryset(self):
+        return super(CandidateManager, self).get_queryset().filter(jedi=None)
+
+
 class Candidate(models.Model):
     name = models.CharField(max_length=100)
     planet = models.ForeignKey(Planet)
     age = models.IntegerField()
     email = models.EmailField()
     jedi = models.ForeignKey(Jedi, null=True)
+    objects = CandidateManager()
 
     def __str__(self):
         return "{} from {}".format(self.name, self.planet)

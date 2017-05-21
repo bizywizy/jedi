@@ -50,7 +50,7 @@ class JediView(ListView):
     context_object_name = 'candidates'
 
     def get_queryset(self):
-        jedi = Jedi.with_padawans.can_teach().get(id=self.kwargs['jedi_id'])
+        jedi = Jedi.objects.get(id=self.kwargs['jedi_id'])
         return Candidate.objects.filter(planet=jedi.planet)
 
     def get_context_data(self, **kwargs):
