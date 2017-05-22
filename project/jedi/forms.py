@@ -11,7 +11,8 @@ class CandidateForm(forms.ModelForm):
 
 
 class ChallengeForm(forms.Form):
-    # переопределим конструктор формы для динамического создания полей
+    # переопределим конструктор формы для динамического создания
+    # полей, в зависимости от количества вопросов
     def __init__(self, *args, **kwargs):
         candidate = kwargs.pop('candidate', None)
         questions = kwargs.pop('questions', None)
@@ -22,6 +23,8 @@ class ChallengeForm(forms.Form):
             self.fields[str(q[0])] = forms.BooleanField(label=q[1], required=False)
 
     def save(self):
+        # try/except нужен для того, чтобы избежать попытки несколько
+        # раз ответить на один вопрос одним кандидатом; если такое событие произошло отдаю 403
         try:
             for k, v in self.cleaned_data.items():
                 Answer.objects.create(question_id=k, candidate=self.candidate, answer=v)
