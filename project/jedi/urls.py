@@ -6,7 +6,7 @@ from . import views
 urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='jedi/index.html'), name='home'),
     url(r'candidate/$', views.NewCandidateView.as_view(), name='new-candidate'),
-    url(r'candidate/(?P<candidate_id>[0-9]+)/order/(?P<order_id>[0-9]+)/try/$',
+    url(r'candidate/(?P<candidate_id>[0-9]+)/order/(?P<order_id>[0-9]+)/$',
         views.ChallengeView.as_view(), name="try-challenge"),
     url(r'candidate/passed/$',
         TemplateView.as_view(template_name='jedi/passed_candidate.html'), name='passed'),
