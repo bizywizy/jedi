@@ -65,6 +65,9 @@ class Answer(models.Model):
     question = models.ForeignKey(Question)
     answer = models.BooleanField()
 
+    # нужно было бы использовать метод validate_unique для уникальности прохождения
+    # кандидатом не вопроса, а в целом испытания, но т.к. в задании не сказано, может ли
+    # кандидат проходить испытание на другой планете я решил оставить так
     class Meta:
         unique_together = (('candidate', 'question'),)
 
